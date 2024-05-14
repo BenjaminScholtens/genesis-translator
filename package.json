@@ -14,6 +14,26 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "genesis-translator-sidebar-view",
+          "title": "Genesis Translator Bar",
+          "icon": "src/media/copilot.svg"
+        }
+      ]
+    },
+    "views": {
+      "genesis-translator-sidebar-view": [
+        {
+          "type": "webview",
+          "id": "genesis-translator-sidebar",
+          "name": "Genesis Translator",
+          "icon": "src/media/copilot.svg",
+          "contextualTitle": "Genesis Translator"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "genesis-translator.initFiles",
@@ -58,6 +78,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.52",
     "@types/node-fetch": "^2.6.5",
+    "@types/polka": "^0.5.7",
     "@types/vscode": "^1.82.0",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
@@ -71,10 +92,12 @@
   "dependencies": {
     "@tectalic/openai": "^0.3.1",
     "@xenova/transformers": "^2.9.0",
+    "create-vite": "^5.1.0",
     "dotenv": "^16.3.1",
     "json5": "^2.2.3",
     "langchain": "^0.0.197-rc.1",
     "node-fetch": "^2.7.0",
+    "polka": "^0.5.2",
     "usfm-grammar": "^2.3.1",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-types": "^3.17.5"

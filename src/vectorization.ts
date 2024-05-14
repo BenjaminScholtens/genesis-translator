@@ -15,6 +15,7 @@ import { copilotFIles } from "./filesToInit";
 import { spawn } from "child_process";
 const workspaceFolder = getWorkSpaceFolder();
 const pythonInterpreter = getPythonInterpreter();
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 function generateEmbedding(textToEmbed: string): Promise<[number[]]> {
   console.log({ textToEmbed });
@@ -129,11 +130,16 @@ async function vectorizeResources() {
     // );
     const data = [];
     for (const file of files) {
-      const content = await vscode.workspace.fs.readFile(file);
-      const lines = content.toString().split("\n");
-      if (lines?.length > 0) {
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
+      const pageContent = await vscode.workspace.fs.readFile(file);
+      // const lines = content.toString().split("\n");
+      const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1_000,
+        chunkOverlap: 20,
+      });
+      const textChunks = await textSplitter.splitText(pageContent.toString());
+      if (textChunks?.length > 0) {
+        for (let i = 0; i < textChunks.length; i++) {
+          const line = textChunks[i];
           console.log({
             line,
             finePath: file.path.replace(workspaceFolder || "", ""),
@@ -154,14 +160,18 @@ async function vectorizeResources() {
         }
       }
     }
-    const resourcesTable = await db.createTable(
-      "resources",
-      data,
-      embedFunctionPython,
-      {
-        writeMode: WriteMode.Overwrite,
-      },
-    );
+    const resourcesTable = await db.createTable("resources", data, {
+      writeMode: WriteMode.Overwrite,
+    });
+    // const hasNamespace = await this.hasNamespace(namespace);
+    // if (hasNamespace) {
+    //   const collection = await client.openTable(namespace);
+    //   await collection.add(data);
+    //   return true;
+    // }
+
+    // await client.createTable(namespace, data);
+    // return true;
     // const resourcesTable = await db.createTable<{
     //   vector: number[];
     //   fileLineNumber: number;

@@ -41,12 +41,13 @@ export function parseApiResponse(response: string): {
   }
 }
 
-async function createChatCompletionWithOpenAi(promt: string) {
+async function createChatCompletionWithOpenAi(prompt: string): Promise<string> {
   try {
+    console.log({ prompt });
     return await tectalicOpenai(process.env.OPENAI_API_KEY)
       .chatCompletions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: promt }],
+        messages: [{ role: "user", content: prompt }],
       })
       .then((response: any) => {
         const responseText = response.data.choices[0].message.content.trim();
@@ -55,6 +56,7 @@ async function createChatCompletionWithOpenAi(promt: string) {
       });
   } catch (error) {
     console.error(error);
+    return "";
   }
 }
 

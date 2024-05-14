@@ -17,6 +17,8 @@ import {
   showDiffWithOriginal,
 } from "./projectEditingTools";
 import { generateFiles } from "./fileUtils";
+import { SidebarProvider } from "./SidebarProvider";
+// import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 
 const grammar = require("usfm-grammar");
 const dotenv = require("dotenv");
@@ -124,6 +126,20 @@ const registerCommand = ({
 };
 
 export function activate(context: vscode.ExtensionContext) {
+  const sidebarProvider = new SidebarProvider(context.extensionUri);
+  const item = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+  );
+  // item.text = "$(beaker) Add Todo";
+  // item.command = "vstodo.addTodo";
+  item.show();
+
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      "genesis-translator-sidebar",
+      sidebarProvider,
+    ),
+  );
   registerCommand({
     context,
     commandName: CommandName.translatorsCopilot,
@@ -138,8 +154,6 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage("No input provided");
           } else {
             if (vscode.workspace.workspaceFolders !== undefined) {
-              //   const rootPath = vscode.workspace.workspaceFolders[0].uri;
-              // fixme: this is not going to work long term. The command list is only going to grow. We should move to a pre process that uses a classifier to select the best tool(s) for the job. Those tools and heigh quality examples can be passed to a fine tuned llm that will use the tools to compleat the task
               try {
                 const prompt = `
 							You are a helpful assistant. Try to answer the user query below by using one of your tools. Pay attention to the input required by each tool.
@@ -156,11 +170,8 @@ export function activate(context: vscode.ExtensionContext) {
 							The Action name must be an exact match and the input should match the format of the example given. 
               Only respond with a value that matches the Action example above.
 						`;
-                console.log({ prompt });
                 const agentOutput = await promptAgent(prompt);
                 const { name, input } = await parseApiResponse(agentOutput);
-                console.log({ name, input });
-                console.log({ agentOutput, prompt });
 
                 if (!name) {
                   vscode.window.showErrorMessage(
